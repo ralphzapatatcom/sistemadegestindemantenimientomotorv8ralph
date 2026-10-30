@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-900 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Mantenimiento Motor V8 OHV</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para iconografía industrial -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Personalización de scrollbar y print */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printable-area, #printable-area * {
+                visibility: visible;
+            }
+            #printable-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                color: #000 !important;
+                background: #fff !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans overflow-hidden bg-slate-950 text-slate-100">
+
+    <!-- HEADER / TOPBAR -->
+    <header class="bg-slate-900 border-b border-slate-800 h-16 flex items-center justify-between px-4 sm:px-6 shrink-0 z-20">
+        <div class="flex items-center space-x-3">
+            <button id="toggle-sidebar" class="text-slate-400 hover:text-white lg:hidden p-2 rounded-lg hover:bg-slate-800">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-500 to-amber-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <i class="fa-solid fa-gears text-slate-950 text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-wide text-white flex items-center gap-2">
+                        MOTOR V8 OHV <span class="text-xs font-normal px-2 py-0.5 rounded bg-brand-500/20 text-brand-500 border border-brand-500/30">motor_ralph_db</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Sistema Técnico de Mantenimiento & Control de Trazabilidad</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones Header -->
+        <div class="flex items-center space-x-3">
+            <div class="hidden md:flex items-center text-xs text-slate-400 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/50">
+                <i class="fa-solid fa-database text-brand-500 mr-2"></i>
+                <span>XAMPP / MySQL Engine: <strong class="text-slate-200">InnoDB</strong></span>
+            </div>
+            <div class="h-6 w-px bg-slate-800 hidden md:block"></div>
+            <div class="flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-xs font-medium text-slate-300 hidden sm:inline">Sistema En Línea</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <div class="flex-1 flex overflow-hidden">
+
+        <!-- SIDEBAR NAVEGACIÓN -->
+        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-slate-900 border-r border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between">
+            <div class="p-4 space-y-1">
+                <div class="px-3 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Módulos del Sistema (7)
+                </div>
+                
+                <nav class="space-y-1">
+                    <button onclick="switchTab('tab-dashboard')" id="nav-tab-dashboard" class="nav-btn active w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-brand-600 text-white">
+                        <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                        <span>1. Dashboard Principal</span>
+                    </button>
+
+                    <button onclick="switchTab('tab-mecanicos')" id="nav-tab-mecanicos" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-colors">
+                        <i class="fa-solid fa-user-gear w-5 text-center"></i>
+                        <span>2. Nómina Mecánicos</span>
+                    </button>
+
+                    <button onclick="switchTab('tab-componentes')" id="nav-tab-componentes" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-colors">
+                        <i class="fa-solid fa-engine w-5 text-center"></i>
+                        <span>3. Componentes V8</span>
+                    </button>
+
+                    <button onclick="switchTab('tab-repuestos')" id="nav-tab-repuestos" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-colors">
+                        <i class="fa-solid fa-boxes-packing w-5 text-center"></i>
+                        <span>4. Repuestos y Stock</span>
+                    </button>
+
+                    <button onclick="switchTab('tab-plan')" id="nav-tab-plan" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-colors">
+                        <i class="fa-solid fa-calendar-check w-5 text-center"></i>
+                        <span>5. Plan Mantenimiento</span>
+                    </button>
+
+                    <button onclick="switchTab('tab-historial')" id="nav-tab-historial" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-colors">
+                        <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i>
+                        <span>6. Bitácora / Historial</span>
+                    </button>
+
+                    <button onclick="switchTab('tab-reportes')" id="nav-tab-reportes" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-colors">
+                        <i class="fa-solid fa-file-invoice w-5 text-center"></i>
+                        <span>7. Reportes e Impresión</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Footer Sidebar con Specs V8 -->
+            <div class="p-4 border-t border-slate-800 bg-slate-900/50">
+                <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50 text-xs space-y-1">
+                    <p class="text-slate-300 font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-wrench text-brand-500"></i> V8 Carburado OHV
+                    </p>
+                    <p class="text-slate-400">Varillas de empuje y taqués</p>
+                    <p class="text-slate-400">Doc Code: <span class="text-slate-300 font-mono">DB-PM-V8-2026</span></p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 overflow-y-auto bg-slate-950 p-4 sm:p-6 lg:p-8">
+
+            <!-- PANTALLA 1: DASHBOARD PRINCIPAL -->
+            <section id="tab-dashboard" class="tab-content space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white tracking-tight">Dashboard General de Mantenimiento</h2>
+                        <p class="text-sm text-slate-400">Resumen operativo, estado del motor V8 y alertas de servicio.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="quickAddHistorial()" class="px-3.5 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium flex items-center gap-2 transition shadow-lg shadow-brand-600/20">
+                            <i class="fa-solid fa-plus"></i> Registrar Mantenimiento
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CARDS KPI -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase">Mecánicos Activos</p>
+                            <h3 id="kpi-mecanicos" class="text-2xl font-bold text-white mt-1">3</h3>
+                            <p class="text-xs text-emerald-400 mt-1 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-check"></i> 100% Cobertura
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase">Subsistemas V8</p>
+                            <h3 id="kpi-componentes" class="text-2xl font-bold text-white mt-1">8</h3>
+                            <p class="text-xs text-slate-400 mt-1">Componentes monitoreados</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-cubes"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase">Stock de Repuestos</p>
+                            <h3 id="kpi-repuestos" class="text-2xl font-bold text-white mt-1">15 pzas</h3>
+                            <p id="kpi-stock-alert" class="text-xs text-amber-400 mt-1 flex items-center gap-1">
+                                <i class="fa-solid fa-triangle-exclamation"></i> 1 en umbral mínimo
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-box-open"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400 uppercase">Servicios Registrados</p>
+                            <h3 id="kpi-historial" class="text-2xl font-bold text-white mt-1">4</h3>
+                            <p class="text-xs text-slate-400 mt-1">Bitácora acumulada</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RESUMEN DE PANTALLAS Y ESTADO DE COMPONENTES -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Tabla Resumen Mantenimiento Próximo -->
+                    <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-white text-base flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-brand-500"></i> Estado del Plan de Mantenimiento por Componente
+                            </h3>
+                            <span class="text-xs text-slate-400">Arquitectura Ralph V8</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-800/60 text-slate-400 text-xs uppercase tracking-wider">
+                                    <tr>
+                                        <th class="p-3 rounded-l-lg">Componente</th>
+                                        <th class="p-3">Frecuencia</th>
+                                        <th class="p-3">Tipo</th>
+                                        <th class="p-3">Último Servicio</th>
+                                        <th class="p-3 rounded-r-lg">Mecánico</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashboard-plan-table" class="divide-y divide-slate-800/50">
+                                    <!-- Inyección dinámica -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Panel Lateral Alertas y Repuestos Críticos -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+                        <h3 class="font-bold text-white text-base flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Alertas de Repuestos & Stock
+                        </h3>
+                        <div id="dashboard-stock-alerts" class="space-y-3">
+                            <!-- Inyección dinámica -->
+                        </div>
+
+                        <hr class="border-slate-800">
+
+                        <h4 class="font-semibold text-xs text-slate-400 uppercase tracking-wider">Protocolos Rápidos del Manual V8</h4>
+                        <div class="bg-slate-800/40 p-3 rounded-lg border border-slate-800 space-y-2 text-xs">
+                            <p class="text-brand-500 font-medium"><i class="fa-solid fa-bolt"></i> Puesta a Punto Encendido</p>
+                            <p class="text-slate-300">Conectar lámpara estroboscópica al cilindro N°1. Ajustar distribuidor a marcas de tiempo (BTDC).</p>
+                        </div>
+                        <div class="bg-slate-800/40 p-3 rounded-lg border border-slate-800 space-y-2 text-xs">
+                            <p class="text-amber-500 font-medium"><i class="fa-solid fa-arrows-spin"></i> Apriete de Culatas</p>
+                            <p class="text-slate-300">Secuencia en espiral desde el centro hacia afuera (40 lb-ft &rarr; 65 lb-ft &rarr; 85 lb-ft).</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PANTALLA 2: MÓDULO DE MECÁNICOS -->
+            <section id="tab-mecanicos" class="tab-content space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white tracking-tight">2. Módulo de Mecánicos</h2>
+                        <p class="text-sm text-slate-400">Gestión de la nómina técnica y especialidades de servicio (`mecanicos`).</p>
+                    </div>
+                    <button onclick="openMecanicoModal()" class="px-3.5 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium flex items-center gap-2 transition">
+                        <i class="fa-solid fa-user-plus"></i> Agregar Mecánico
+                    </button>
+                </div>
+
+                <!-- Filtros y Búsqueda -->
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <div class="relative w-full md:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                        <input type="text" id="mecanico-search" oninput="renderMecanicos()" placeholder="Buscar por nombre o especialidad..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500 transition">
+                    </div>
+                    <div class="flex items-center space-x-3 w-full md:w-auto">
+                        <label class="text-xs text-slate-400 whitespace-nowrap">Estado:</label>
+                        <select id="mecanico-filter-estado" onchange="renderMecanicos()" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                            <option value="">Todos</option>
+                            <option value="Activo">Activo</option>
+                            <option value="Inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tabla Mecánicos -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-800/80 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+                                <tr>
+                                    <th class="p-4">ID</th>
+                                    <th class="p-4">Nombre Mecánico</th>
+                                    <th class="p-4">Especialidad Técnica</th>
+                                    <th class="p-4">Estado</th>
+                                    <th class="p-4 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mecanicos-table-body" class="divide-y divide-slate-800/60">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PANTALLA 3: MÓDULO DE COMPONENTES DEL MOTOR -->
+            <section id="tab-componentes" class="tab-content space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white tracking-tight">3. Componentes del Motor V8</h2>
+                        <p class="text-sm text-slate-400">Asignación técnica a los 8 subsistemas principales (`componentes_motor`).</p>
+                    </div>
+                    <button onclick="openComponenteModal()" class="px-3.5 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium flex items-center gap-2 transition">
+                        <i class="fa-solid fa-plus"></i> Agregar Componente
+                    </button>
+                </div>
+
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row gap-4 justify-between">
+                    <div class="relative w-full md:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                        <input type="text" id="componente-search" oninput="renderComponentes()" placeholder="Buscar componente o subsistema..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-800/80 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+                                <tr>
+                                    <th class="p-4">ID</th>
+                                    <th class="p-4">Nombre del Componente</th>
+                                    <th class="p-4">Subsistema V8</th>
+                                    <th class="p-4">Mecánico Responsable</th>
+                                    <th class="p-4 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="componentes-table-body" class="divide-y divide-slate-800/60">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PANTALLA 4: MÓDULO DE REPUESTOS / STOCK -->
+            <section id="tab-repuestos" class="tab-content space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white tracking-tight">4. Inventario de Repuestos y Stock</h2>
+                        <p class="text-sm text-slate-400">Control de piezas de recambio y umbrales de reabastecimiento (`repuestos_stock`).</p>
+                    </div>
+                    <button onclick="openRepuestoModal()" class="px-3.5 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium flex items-center gap-2 transition">
+                        <i class="fa-solid fa-box"></i> Agregar Repuesto
+                    </button>
+                </div>
+
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row gap-4 justify-between">
+                    <div class="relative w-full md:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                        <input type="text" id="repuesto-search" oninput="renderRepuestos()" placeholder="Buscar código o nombre repuesto..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-800/80 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+                                <tr>
+                                    <th class="p-4">ID</th>
+                                    <th class="p-4">Código Pieza</th>
+                                    <th class="p-4">Nombre Repuesto</th>
+                                    <th class="p-4">Componente Asociado</th>
+                                    <th class="p-4">Stock Actual</th>
+                                    <th class="p-4">Stock Mínimo</th>
+                                    <th class="p-4">Estado Stock</th>
+                                    <th class="p-4 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="repuestos-table-body" class="divide-y divide-slate-800/60">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PANTALLA 5: MÓDULO DE PLAN DE MANTENIMIENTO -->
+            <section id="tab-plan" class="tab-content space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white tracking-tight">5. Plan de Mantenimiento Preventivo</h2>
+                        <p class="text-sm text-slate-400">Programación de frecuencias en kilómetros, horas de uso y fechas (`plan_mantenimiento`).</p>
+                    </div>
+                    <button onclick="openPlanModal()" class="px-3.5 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium flex items-center gap-2 transition">
+                        <i class="fa-solid fa-calendar-plus"></i> Programar Mantenimiento
+                    </button>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-800/80 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+                                <tr>
+                                    <th class="p-4">ID Plan</th>
+                                    <th class="p-4">Componente</th>
+                                    <th class="p-4">Frecuencia (Km)</th>
+                                    <th class="p-4">Frecuencia (Horas)</th>
+                                    <th class="p-4">Tipo Servicio</th>
+                                    <th class="p-4">Último Mantenimiento</th>
+                                    <th class="p-4 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="plan-table-body" class="divide-y divide-slate-800/60">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PANTALLA 6: MÓDULO DE BITÁCORA / HISTORIAL DE EJECUCIONES -->
+            <section id="tab-historial" class="tab-content space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white tracking-tight">6. Bitácora / Historial de Ejecuciones</h2>
+                        <p class="text-sm text-slate-400">Registro histórico de servicios ejecutados en el motor (`historial_mantenimiento`).</p>
+                    </div>
+                    <button onclick="openHistorialModal()" class="px-3.5 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium flex items-center gap-2 transition">
+                        <i class="fa-solid fa-file-circle-plus"></i> Registrar Intervención
+                    </button>
+                </div>
+
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row gap-4 justify-between">
+                    <div class="relative w-full md:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                        <input type="text" id="historial-search" oninput="renderHistorial()" placeholder="Buscar en observaciones o componentes..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-800/80 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+                                <tr>
+                                    <th class="p-4">ID</th>
+                                    <th class="p-4">Fecha</th>
+                                    <th class="p-4">Componente</th>
+                                    <th class="p-4">Mecánico</th>
+                                    <th class="p-4">Km Actuales</th>
+                                    <th class="p-4">Horas Uso</th>
+                                    <th class="p-4">Detalles / Observaciones</th>
+                                    <th class="p-4">Costo ($)</th>
+                                    <th class="p-4 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historial-table-body" class="divide-y divide-slate-800/60">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PANTALLA 7: VENTANA DE REPORTES E IMPRESIÓN -->
+            <section id="tab-reportes" class="tab-content space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white tracking-tight">7. Ventana de Reportes e Impresión</h2>
+                        <p class="text-sm text-slate-400">Generación de informes de servicio, filtrado dinámico e impresión formateada.</p>
+                    </div>
+                    <button onclick="window.print()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium flex items-center gap-2 transition shadow-lg shadow-emerald-600/20">
+                        <i class="fa-solid fa-print"></i> Imprimir / Exportar Reporte
+                    </button>
+                </div>
+
+                <!-- Panel de Configuración del Reporte -->
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4">
+                    <h3 class="font-bold text-white text-sm uppercase tracking-wider text-brand-500">Parámetros de Filtrado</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Filtrar por Mecánico:</label>
+                            <select id="report-filter-mecanico" onchange="generateReport()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                                <option value="">Todos los mecánicos</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Tipo de Mantenimiento:</label>
+                            <select id="report-filter-tipo" onchange="generateReport()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                                <option value="">Todos los tipos</option>
+                                <option value="PREVENTIVO">PREVENTIVO</option>
+                                <option value="AJUSTE">AJUSTE</option>
+                                <option value="RUTINA">RUTINA</option>
+                                <option value="CRÍTICO">CRÍTICO</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Orden de Datos:</label>
+                            <select id="report-sort" onchange="generateReport()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                                <option value="fecha-desc">Fecha (Más reciente primero)</option>
+                                <option value="fecha-asc">Fecha (Más antigua primero)</option>
+                                <option value="costo-desc">Costo (Mayor a menor)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VISTA PREVIA IMPRIMIBLE -->
+                <div id="printable-area" class="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-6">
+                    <!-- Cabecera de reporte impreso -->
+                    <div class="flex justify-between items-start border-b border-slate-700 pb-4">
+                        <div>
+                            <h1 class="text-xl font-bold text-white tracking-wide">REPORTE TÉCNICO DE MANTENIMIENTO V8 OHV</h1>
+                            <p class="text-xs text-slate-400">Sistema Base de Datos: <span class="font-mono text-slate-300">motor_ralph_db</span></p>
+                        </div>
+                        <div class="text-right text-xs text-slate-400">
+                            <p>Fecha Emisión: <strong class="text-slate-200" id="report-date-now">--/--/----</strong></p>
+                            <p>Código Doc: <strong class="text-slate-200">DB-PM-V8-2026-DATE</strong></p>
+                        </div>
+                    </div>
+
+                    <!-- Resumen Numérico -->
+                    <div class="grid grid-cols-3 gap-4 bg-slate-950/60 p-4 rounded-lg border border-slate-800 text-center">
+                        <div>
+                            <p class="text-xs text-slate-400">Intervenciones Mostradas</p>
+                            <p class="text-lg font-bold text-white" id="report-count">0</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Inversión Acumulada Total</p>
+                            <p class="text-lg font-bold text-emerald-400" id="report-total-cost">$0.00</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Motor de Diagnóstico</p>
+                            <p class="text-lg font-bold text-brand-500">V8 OHV Carburado</p>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Resultados -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-800 text-slate-300 text-xs uppercase">
+                                <tr>
+                                    <th class="p-3">Fecha</th>
+                                    <th class="p-3">Componente / Subsistema</th>
+                                    <th class="p-3">Técnico Responsable</th>
+                                    <th class="p-3">Km / Horas</th>
+                                    <th class="p-3">Detalle Mantenimiento</th>
+                                    <th class="p-3 text-right">Costo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-table-body" class="divide-y divide-slate-800 text-slate-300">
+                                <!-- Inyección dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pie de Firma impreso -->
+                    <div class="pt-8 grid grid-cols-2 gap-8 text-center text-xs text-slate-400">
+                        <div class="border-t border-slate-700 pt-2">
+                            <p class="font-semibold text-slate-300">José Pérez / Carlos Mendoza / Ralph</p>
+                            <p>Firma Técnico Especialista V8</p>
+                        </div>
+                        <div class="border-t border-slate-700 pt-2">
+                            <p class="font-semibold text-slate-300">Supervisión Técnica de Taller</p>
+                            <p>Sello y Conformidad de Servicio</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL GENÉRICO PARA CRUD (Mecánicos, Componentes, Repuestos, Plan, Historial) -->
+    <div id="crud-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="bg-slate-800/80 px-5 py-4 border-b border-slate-700 flex justify-between items-center">
+                <h3 id="modal-title" class="font-bold text-white text-base">Título Modal</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <form id="modal-form" onsubmit="handleModalSubmit(event)" class="p-5 space-y-4">
+                <div id="modal-fields-container" class="space-y-4">
+                    <!-- Inyección dinámica de campos del formulario -->
+                </div>
+
+                <div class="pt-4 border-t border-slate-800 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Registro
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE LÓGICA Y DATOS DE LA BASE DE DATOS -->
+    <script>
+        // ESTADO GLOBAL DE LA BASE DE DATOS (Basado en DDL / DML adjunto)
+        const db = {
+            mecanicos: [
+                { id_mecanico: 1, nombre: "José Pérez", especialidad: "Lubricación y Enfriamiento", estado: "Activo" },
+                { id_mecanico: 2, nombre: "Carlos Mendoza", especialidad: "Inyección y Carburación", estado: "Activo" },
+                { id_mecanico: 3, nombre: "Ralph Demoledor", especialidad: "Motores V8 y Tren OHV", estado: "Activo" }
+            ],
+            componentes: [
+                { id_componente: 1, nombre_componente: "Cárter, Aceite y Colador", subsistema: "Sistema de Lubricación", id_mecanico_responsable: 1 },
+                { id_componente: 2, nombre_componente: "Carburador", subsistema: "Alimentación y Admisión", id_mecanico_responsable: 2 },
+                { id_componente: 3, nombre_componente: "Bujías y Cables", subsistema: "Encendido Convencional", id_mecanico_responsable: 3 },
+                { id_componente: 4, nombre_componente: "Distribuidor", subsistema: "Encendido Convencional", id_mecanico_responsable: 3 },
+                { id_componente: 5, nombre_componente: "Varillas y Balancines", subsistema: "Tren de Distribución", id_mecanico_responsable: 3 },
+                { id_componente: 6, nombre_componente: "Cadena de Distribución", subsistema: "Tren de Distribución", id_mecanico_responsable: 3 },
+                { id_componente: 7, nombre_componente: "Bomba de Agua", subsistema: "Refrigeración", id_mecanico_responsable: 1 },
+                { id_componente: 8, nombre_componente: "Colectores de Escape", subsistema: "Escape", id_mecanico_responsable: 2 }
+            ],
+            repuestos: [
+                { id_repuesto: 1, id_componente: 1, codigo_pieza: "LUB-CAR-001", nombre_repuesto: "Filtro de aceite motor V8 Colador", stock_actual: 4, stock_minimo: 2 },
+                { id_repuesto: 2, id_componente: 2, codigo_pieza: "CAR-CHIC-002", nombre_repuesto: "Juego de chiclés y juntas", stock_actual: 3, stock_minimo: 2 },
+                { id_repuesto: 3, id_componente: 3, codigo_pieza: "ENC-BUJ-003", nombre_repuesto: "Juego de bujías (8 unidades)", stock_actual: 6, stock_minimo: 2 },
+                { id_repuesto: 4, id_componente: 4, codigo_pieza: "ENC-DIST-004", nombre_repuesto: "Platinos y condensador", stock_actual: 2, stock_minimo: 2 }
+            ],
+            plan: [
+                { id_plan: 1, id_componente: 1, frecuencia_km: 5000, frecuencia_horas: 150, tipo_mantenimiento: "PREVENTIVO", fecha_ultimo_mantenimiento: "2026-10-15" },
+                { id_plan: 2, id_componente: 2, frecuencia_km: 10000, frecuencia_horas: 300, tipo_mantenimiento: "AJUSTE", fecha_ultimo_mantenimiento: "2026-08-20" },
+                { id_plan: 3, id_componente: 3, frecuencia_km: 10000, frecuencia_horas: 300, tipo_mantenimiento: "RUTINA", fecha_ultimo_mantenimiento: "2026-09-01" },
+                { id_plan: 4, id_componente: 4, frecuencia_km: 15000, frecuencia_horas: 450, tipo_mantenimiento: "CRÍTICO", fecha_ultimo_mantenimiento: "2026-05-10" },
+                { id_plan: 5, id_componente: 5, frecuencia_km: 20000, frecuencia_horas: 600, tipo_mantenimiento: "PREVENTIVO", fecha_ultimo_mantenimiento: "2026-03-12" },
+                { id_plan: 6, id_componente: 6, frecuencia_km: 40000, frecuencia_horas: 1200, tipo_mantenimiento: "CRÍTICO", fecha_ultimo_mantenimiento: "2025-11-18" },
+                { id_plan: 7, id_componente: 7, frecuencia_km: 20000, frecuencia_horas: 600, tipo_mantenimiento: "RUTINA", fecha_ultimo_mantenimiento: "2026-07-04" },
+                { id_plan: 8, id_componente: 8, frecuencia_km: 30000, frecuencia_horas: 900, tipo_mantenimiento: "RUTINA", fecha_ultimo_mantenimiento: "2026-01-30" }
+            ],
+            historial: [
+                { id_historial: 1, id_componente: 1, id_mecanico: 1, fecha_mantenimiento: "2026-10-15", km_actuales: 45000, horas_uso: 1350, detalles_observaciones: "Cambio de fluido lubricante 20W50, filtro y limpieza general de colador cárter.", costo_total: 85.00 },
+                { id_historial: 2, id_componente: 2, id_mecanico: 2, fecha_mantenimiento: "2026-08-20", km_actuales: 40000, horas_uso: 1200, detalles_observaciones: "Limpieza de chiclés principales y ajuste fino de tornillos de mezcla al ralentí.", costo_total: 45.00 },
+                { id_historial: 3, id_componente: 3, id_mecanico: 3, fecha_mantenimiento: "2026-09-01", km_actuales: 42000, horas_uso: 1260, detalles_observaciones: "Calibración de luz de electrodo (gap 0.035 in) e inspección de resistencia de cables.", costo_total: 30.00 },
+                { id_historial: 4, id_componente: 4, id_mecanico: 3, fecha_mantenimiento: "2026-05-10", km_actuales: 35000, horas_uso: 1050, detalles_observaciones: "Inspección de platinos/condensador y ajuste con lámpara estroboscópica.", costo_total: 60.00 }
+            ]
+        };
+
+        // Estado del Modal CRUD Activo
+        let currentModalMode = { entity: null, action: 'add', id: null };
+
+        // INICIALIZACIÓN
+        window.onload = function() {
+            document.getElementById('report-date-now').textContent = new Date().toLocaleDateString('es-ES');
+            refreshAllViews();
+            setupSidebarToggle();
+        };
+
+        function setupSidebarToggle() {
+            const toggleBtn = document.getElementById('toggle-sidebar');
+            const sidebar = document.getElementById('sidebar');
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+        }
+
+        // CAMBIO DE PANTALLAS / TABS
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-600', 'text-white');
+                btn.classList.add('text-slate-400');
+            });
+
+            document.getElementById(tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('nav-' + tabId);
+            if(activeBtn) {
+                activeBtn.classList.add('bg-brand-600', 'text-white');
+                activeBtn.classList.remove('text-slate-400');
+            }
+
+            // Ocultar sidebar en móvil al seleccionar
+            if(window.innerWidth < 1024) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
+
+            if(tabId === 'tab-reportes') {
+                populateReportSelects();
+                generateReport();
+            }
+        }
+
+        function refreshAllViews() {
+            renderDashboard();
+            renderMecanicos();
+            renderComponentes();
+            renderRepuestos();
+            renderPlan();
+            renderHistorial();
+        }
+
+        // HELPERS AUXILIARES DE BÚSQUEDA / MAPEO
+        function getMecanicoNombre(id) {
+            const m = db.mecanicos.find(x => x.id_mecanico == id);
+            return m ? m.nombre : 'Sin Asignar';
+        }
+
+        function getComponenteNombre(id) {
+            const c = db.componentes.find(x => x.id_componente == id);
+            return c ? c.nombre_componente : 'No Especificado';
+        }
+
+        // PANTALLA 1: RENDER DASHBOARD
+        function renderDashboard() {
+            // Actualizar KPIs
+            document.getElementById('kpi-mecanicos').textContent = db.mecanicos.filter(m => m.estado === 'Activo').length;
+            document.getElementById('kpi-componentes').textContent = db.componentes.length;
+            
+            const totalStock = db.repuestos.reduce((acc, item) => acc + item.stock_actual, 0);
+            const lowStockCount = db.repuestos.filter(r => r.stock_actual <= r.stock_minimo).length;
+            document.getElementById('kpi-repuestos').textContent = `${totalStock} pzas`;
+            document.getElementById('kpi-stock-alert').innerHTML = lowStockCount > 0 
+                ? `<i class="fa-solid fa-triangle-exclamation text-amber-500"></i> ${lowStockCount} en umbral crítico` 
+                : `<i class="fa-solid fa-circle-check text-emerald-400"></i> Stock óptimo`;
+
+            document.getElementById('kpi-historial').textContent = db.historial.length;
+
+            // Tabla Resumen Mantenimiento
+            const tbody = document.getElementById('dashboard-plan-table');
+            tbody.innerHTML = db.plan.map(p => {
+                const comp = db.componentes.find(c => c.id_componente == p.id_componente);
+                const meca = comp ? getMecanicoNombre(comp.id_mecanico_responsable) : 'N/A';
+                
+                let badgeClass = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+                if(p.tipo_mantenimiento === 'CRÍTICO') badgeClass = "bg-rose-500/10 text-rose-400 border-rose-500/20";
+                if(p.tipo_mantenimiento === 'AJUSTE') badgeClass = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+
+                return `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="p-3 font-semibold text-white">${getComponenteNombre(p.id_componente)}</td>
+                        <td class="p-3 text-xs text-slate-300">${p.frecuencia_km.toLocaleString()} km / ${p.frecuencia_horas} hrs</td>
+                        <td class="p-3"><span class="px-2 py-0.5 text-xs rounded border font-medium ${badgeClass}">${p.tipo_mantenimiento}</span></td>
+                        <td class="p-3 text-xs text-slate-300 font-mono">${p.fecha_ultimo_mantenimiento || 'Pendiente'}</td>
+                        <td class="p-3 text-xs text-slate-400">${meca}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Repuestos Críticos
+            const alertContainer = document.getElementById('dashboard-stock-alerts');
+            alertContainer.innerHTML = db.repuestos.map(r => {
+                const isCritical = r.stock_actual <= r.stock_minimo;
+                return `
+                    <div class="p-3 rounded-lg bg-slate-800/40 border ${isCritical ? 'border-amber-500/40' : 'border-slate-800'} flex justify-between items-center text-xs">
+                        <div>
+                            <p class="font-semibold text-slate-200">${r.nombre_repuesto}</p>
+                            <p class="text-slate-400 font-mono">${r.codigo_pieza}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="px-2 py-0.5 rounded font-bold ${isCritical ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}">
+                                ${r.stock_actual} / Mín: ${r.stock_minimo}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // PANTALLA 2: RENDER MECÁNICOS
+        function renderMecanicos() {
+            const query = document.getElementById('mecanico-search').value.toLowerCase();
+            const filterEstado = document.getElementById('mecanico-filter-estado').value;
+            const tbody = document.getElementById('mecanicos-table-body');
+
+            const filtered = db.mecanicos.filter(m => {
+                const matchQuery = m.nombre.toLowerCase().includes(query) || m.especialidad.toLowerCase().includes(query);
+                const matchEstado = !filterEstado || m.estado === filterEstado;
+                return matchQuery && matchEstado;
+            });
+
+            tbody.innerHTML = filtered.map(m => `
+                <tr class="hover:bg-slate-800/40 transition">
+                    <td class="p-4 font-mono text-slate-400">#${m.id_mecanico}</td>
+                    <td class="p-4 font-bold text-white">${m.nombre}</td>
+                    <td class="p-4 text-slate-300">${m.especialidad}</td>
+                    <td class="p-4">
+                        <span class="px-2.5 py-1 text-xs rounded-full font-medium ${m.estado === 'Activo' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-700 text-slate-400'}">
+                            ${m.estado}
+                        </span>
+                    </td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="editMecanico(${m.id_mecanico})" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition"><i class="fa-solid fa-pen"></i> Modificar</button>
+                        <button onclick="deleteMecanico(${m.id_mecanico})" class="px-2.5 py-1 bg-rose-900/30 hover:bg-rose-900/60 text-rose-300 rounded text-xs transition"><i class="fa-solid fa-trash"></i> Eliminar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // PANTALLA 3: RENDER COMPONENTES
+        function renderComponentes() {
+            const query = document.getElementById('componente-search').value.toLowerCase();
+            const tbody = document.getElementById('componentes-table-body');
+
+            const filtered = db.componentes.filter(c => 
+                c.nombre_componente.toLowerCase().includes(query) || c.subsistema.toLowerCase().includes(query)
+            );
+
+            tbody.innerHTML = filtered.map(c => `
+                <tr class="hover:bg-slate-800/40 transition">
+                    <td class="p-4 font-mono text-slate-400">#${c.id_componente}</td>
+                    <td class="p-4 font-bold text-white">${c.nombre_componente}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded bg-slate-800 text-brand-400 text-xs font-medium">${c.subsistema}</span></td>
+                    <td class="p-4 text-slate-300">${getMecanicoNombre(c.id_mecanico_responsable)}</td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="editComponente(${c.id_componente})" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition"><i class="fa-solid fa-pen"></i> Modificar</button>
+                        <button onclick="deleteComponente(${c.id_componente})" class="px-2.5 py-1 bg-rose-900/30 hover:bg-rose-900/60 text-rose-300 rounded text-xs transition"><i class="fa-solid fa-trash"></i> Eliminar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // PANTALLA 4: RENDER REPUESTOS
+        function renderRepuestos() {
+            const query = document.getElementById('repuesto-search').value.toLowerCase();
+            const tbody = document.getElementById('repuestos-table-body');
+
+            const filtered = db.repuestos.filter(r => 
+                r.nombre_repuesto.toLowerCase().includes(query) || r.codigo_pieza.toLowerCase().includes(query)
+            );
+
+            tbody.innerHTML = filtered.map(r => {
+                const isAlert = r.stock_actual <= r.stock_minimo;
+                return `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="p-4 font-mono text-slate-400">#${r.id_repuesto}</td>
+                        <td class="p-4 font-mono text-brand-400 font-semibold">${r.codigo_pieza}</td>
+                        <td class="p-4 font-medium text-white">${r.nombre_repuesto}</td>
+                        <td class="p-4 text-slate-300">${getComponenteNombre(r.id_componente)}</td>
+                        <td class="p-4 font-bold text-white">${r.stock_actual}</td>
+                        <td class="p-4 text-slate-400">${r.stock_minimo}</td>
+                        <td class="p-4">
+                            <span class="px-2.5 py-1 text-xs rounded-full font-medium ${isAlert ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400'}">
+                                ${isAlert ? 'Reabastecer' : 'Disponible'}
+                            </span>
+                        </td>
+                        <td class="p-4 text-right space-x-2">
+                            <button onclick="editRepuesto(${r.id_repuesto})" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition"><i class="fa-solid fa-pen"></i> Modificar</button>
+                            <button onclick="deleteRepuesto(${r.id_repuesto})" class="px-2.5 py-1 bg-rose-900/30 hover:bg-rose-900/60 text-rose-300 rounded text-xs transition"><i class="fa-solid fa-trash"></i> Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // PANTALLA 5: RENDER PLAN DE MANTENIMIENTO
+        function renderPlan() {
+            const tbody = document.getElementById('plan-table-body');
+            tbody.innerHTML = db.plan.map(p => `
+                <tr class="hover:bg-slate-800/40 transition">
+                    <td class="p-4 font-mono text-slate-400">#${p.id_plan}</td>
+                    <td class="p-4 font-bold text-white">${getComponenteNombre(p.id_componente)}</td>
+                    <td class="p-4 text-slate-300 font-mono">${p.frecuencia_km.toLocaleString()} km</td>
+                    <td class="p-4 text-slate-300 font-mono">${p.frecuencia_horas} hrs</td>
+                    <td class="p-4"><span class="px-2 py-0.5 rounded bg-slate-800 text-brand-400 text-xs font-semibold">${p.tipo_mantenimiento}</span></td>
+                    <td class="p-4 font-mono text-slate-300">${p.fecha_ultimo_mantenimiento || 'N/A'}</td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="editPlan(${p.id_plan})" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition"><i class="fa-solid fa-pen"></i> Modificar</button>
+                        <button onclick="deletePlan(${p.id_plan})" class="px-2.5 py-1 bg-rose-900/30 hover:bg-rose-900/60 text-rose-300 rounded text-xs transition"><i class="fa-solid fa-trash"></i> Eliminar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // PANTALLA 6: RENDER HISTORIAL / BITÁCORA
+        function renderHistorial() {
+            const query = document.getElementById('historial-search').value.toLowerCase();
+            const tbody = document.getElementById('historial-table-body');
+
+            const filtered = db.historial.filter(h => 
+                h.detalles_observaciones.toLowerCase().includes(query) || 
+                getComponenteNombre(h.id_componente).toLowerCase().includes(query)
+            );
+
+            tbody.innerHTML = filtered.map(h => `
+                <tr class="hover:bg-slate-800/40 transition">
+                    <td class="p-4 font-mono text-slate-400">#${h.id_historial}</td>
+                    <td class="p-4 font-mono text-slate-200">${h.fecha_mantenimiento}</td>
+                    <td class="p-4 font-bold text-white">${getComponenteNombre(h.id_componente)}</td>
+                    <td class="p-4 text-slate-300">${getMecanicoNombre(h.id_mecanico)}</td>
+                    <td class="p-4 font-mono text-xs text-slate-300">${h.km_actuales.toLocaleString()} km</td>
+                    <td class="p-4 font-mono text-xs text-slate-300">${h.horas_uso} hrs</td>
+                    <td class="p-4 text-xs text-slate-400 max-w-xs truncate" title="${h.detalles_observaciones}">${h.detalles_observaciones}</td>
+                    <td class="p-4 font-mono font-bold text-emerald-400">$${parseFloat(h.costo_total).toFixed(2)}</td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="editHistorial(${h.id_historial})" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition"><i class="fa-solid fa-pen"></i> Edit</button>
+                        <button onclick="deleteHistorial(${h.id_historial})" class="px-2.5 py-1 bg-rose-900/30 hover:bg-rose-900/60 text-rose-300 rounded text-xs transition"><i class="fa-solid fa-trash"></i> Del</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // PANTALLA 7: VENTANA DE REPORTES
+        function populateReportSelects() {
+            const mecSelect = document.getElementById('report-filter-mecanico');
+            mecSelect.innerHTML = '<option value="">Todos los mecánicos</option>' + 
+                db.mecanicos.map(m => `<option value="${m.id_mecanico}">${m.nombre}</option>`).join('');
+        }
+
+        function generateReport() {
+            const mecId = document.getElementById('report-filter-mecanico').value;
+            const tipoFilter = document.getElementById('report-filter-tipo').value;
+            const sortMode = document.getElementById('report-sort').value;
+
+            let reportData = [...db.historial];
+
+            // Filtros
+            if(mecId) {
+                reportData = reportData.filter(h => h.id_mecanico == mecId);
+            }
+            if(tipoFilter) {
+                const compsWithTipo = db.plan.filter(p => p.tipo_mantenimiento === tipoFilter).map(p => p.id_componente);
+                reportData = reportData.filter(h => compsWithTipo.includes(h.id_componente));
+            }
+
+            // Ordenamiento
+            if(sortMode === 'fecha-desc') {
+                reportData.sort((a,b) => new Date(b.fecha_mantenimiento) - new Date(a.fecha_mantenimiento));
+            } else if(sortMode === 'fecha-asc') {
+                reportData.sort((a,b) => new Date(a.fecha_mantenimiento) - new Date(b.fecha_mantenimiento));
+            } else if(sortMode === 'costo-desc') {
+                reportData.sort((a,b) => b.costo_total - a.costo_total);
+            }
+
+            // Render Reporte
+            const tbody = document.getElementById('report-table-body');
+            let totalInversion = 0;
+
+            tbody.innerHTML = reportData.map(h => {
+                totalInversion += parseFloat(h.costo_total);
+                return `
+                    <tr class="hover:bg-slate-800/30">
+                        <td class="p-3 font-mono text-xs">${h.fecha_mantenimiento}</td>
+                        <td class="p-3 font-semibold text-white">${getComponenteNombre(h.id_componente)}</td>
+                        <td class="p-3">${getMecanicoNombre(h.id_mecanico)}</td>
+                        <td class="p-3 font-mono text-xs">${h.km_actuales.toLocaleString()} km / ${h.horas_uso} hrs</td>
+                        <td class="p-3 text-xs text-slate-300">${h.detalles_observaciones}</td>
+                        <td class="p-3 font-mono text-right font-bold text-emerald-400">$${parseFloat(h.costo_total).toFixed(2)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('report-count').textContent = reportData.length;
+            document.getElementById('report-total-cost').textContent = `$${totalInversion.toFixed(2)}`;
+        }
+
+        // OPERACIONES CRUD & MODALES (MECÁNICOS, COMPONENTES, REPUESTOS, PLAN, HISTORIAL)
+        function openModal(title, fieldsHTML, entity, action, id = null) {
+            currentModalMode = { entity, action, id };
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-fields-container').innerHTML = fieldsHTML;
+            document.getElementById('crud-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('crud-modal').classList.add('hidden');
+        }
+
+        // --- MANEJO DE MECÁNICOS ---
+        function openMecanicoModal(mecanico = null) {
+            const isEdit = !!mecanico;
+            const fields = `
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Nombre Completo del Mecánico:</label>
+                    <input type="text" id="m_nombre" required value="${isEdit ? mecanico.nombre : ''}" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Especialidad Técnica:</label>
+                    <input type="text" id="m_especialidad" required value="${isEdit ? mecanico.especialidad : ''}" placeholder="Ej. Lubricación, Carburación V8" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Estado Operativo:</label>
+                    <select id="m_estado" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                        <option value="Activo" ${isEdit && mecanico.estado === 'Activo' ? 'selected' : ''}>Activo</option>
+                        <option value="Inactivo" ${isEdit && mecanico.estado === 'Inactivo' ? 'selected' : ''}>Inactivo</option>
+                    </select>
+                </div>
+            `;
+            openModal(isEdit ? 'Modificar Mecánico' : 'Agregar Nuevo Mecánico', fields, 'mecanicos', isEdit ? 'edit' : 'add', isEdit ? mecanico.id_mecanico : null);
+        }
+
+        function editMecanico(id) {
+            const mecanico = db.mecanicos.find(m => m.id_mecanico === id);
+            if(mecanico) openMecanicoModal(mecanico);
+        }
+
+        function deleteMecanico(id) {
+            if(confirm('¿Está seguro de eliminar este registro técnico de nómina?')) {
+                db.mecanicos = db.mecanicos.filter(m => m.id_mecanico !== id);
+                refreshAllViews();
+            }
+        }
+
+        // --- MANEJO DE COMPONENTES ---
+        function openComponenteModal(componente = null) {
+            const isEdit = !!componente;
+            const mecanicosOpts = db.mecanicos.map(m => `<option value="${m.id_mecanico}" ${isEdit && componente.id_mecanico_responsable == m.id_mecanico ? 'selected' : ''}>${m.nombre} (${m.especialidad})</option>`).join('');
+
+            const fields = `
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Nombre del Componente V8:</label>
+                    <input type="text" id="c_nombre" required value="${isEdit ? componente.nombre_componente : ''}" placeholder="Ej. Carburador, Bujías" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Subsistema V8:</label>
+                    <select id="c_subsistema" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                        <option value="Sistema de Lubricación" ${isEdit && componente.subsistema === 'Sistema de Lubricación' ? 'selected' : ''}>Sistema de Lubricación</option>
+                        <option value="Alimentación y Admisión" ${isEdit && componente.subsistema === 'Alimentación y Admisión' ? 'selected' : ''}>Alimentación y Admisión</option>
+                        <option value="Encendido Convencional" ${isEdit && componente.subsistema === 'Encendido Convencional' ? 'selected' : ''}>Encendido Convencional</option>
+                        <option value="Tren de Distribución" ${isEdit && componente.subsistema === 'Tren de Distribución' ? 'selected' : ''}>Tren de Distribución</option>
+                        <option value="Refrigeración" ${isEdit && componente.subsistema === 'Refrigeración' ? 'selected' : ''}>Refrigeración</option>
+                        <option value="Escape" ${isEdit && componente.subsistema === 'Escape' ? 'selected' : ''}>Escape</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Mecánico Técnico Asignado:</label>
+                    <select id="c_mecanico" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                        ${mecanicosOpts}
+                    </select>
+                </div>
+            `;
+            openModal(isEdit ? 'Modificar Componente' : 'Agregar Componente V8', fields, 'componentes', isEdit ? 'edit' : 'add', isEdit ? componente.id_componente : null);
+        }
+
+        function editComponente(id) {
+            const comp = db.componentes.find(c => c.id_componente === id);
+            if(comp) openComponenteModal(comp);
+        }
+
+        function deleteComponente(id) {
+            if(confirm('¿Eliminar componente del motor?')) {
+                db.componentes = db.componentes.filter(c => c.id_componente !== id);
+                refreshAllViews();
+            }
+        }
+
+        // --- MANEJO DE REPUESTOS ---
+        function openRepuestoModal(repuesto = null) {
+            const isEdit = !!repuesto;
+            const compOpts = db.componentes.map(c => `<option value="${c.id_componente}" ${isEdit && repuesto.id_componente == c.id_componente ? 'selected' : ''}>${c.nombre_componente}</option>`).join('');
+
+            const fields = `
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Código Único Pieza:</label>
+                    <input type="text" id="r_codigo" required value="${isEdit ? repuesto.codigo_pieza : ''}" placeholder="Ej. LUB-CAR-001" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Nombre Repuesto / Recambio:</label>
+                    <input type="text" id="r_nombre" required value="${isEdit ? repuesto.nombre_repuesto : ''}" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Componente del Motor Asociado:</label>
+                    <select id="r_componente" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                        ${compOpts}
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Stock Actual:</label>
+                        <input type="number" id="r_stock_actual" min="0" required value="${isEdit ? repuesto.stock_actual : 0}" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Stock Mínimo (Umbral):</label>
+                        <input type="number" id="r_stock_minimo" min="1" required value="${isEdit ? repuesto.stock_minimo : 2}" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+            `;
+            openModal(isEdit ? 'Modificar Repuesto' : 'Agregar Repuesto', fields, 'repuestos', isEdit ? 'edit' : 'add', isEdit ? repuesto.id_repuesto : null);
+        }
+
+        function editRepuesto(id) {
+            const rep = db.repuestos.find(r => r.id_repuesto === id);
+            if(rep) openRepuestoModal(rep);
+        }
+
+        function deleteRepuesto(id) {
+            if(confirm('¿Eliminar repuesto del inventario?')) {
+                db.repuestos = db.repuestos.filter(r => r.id_repuesto !== id);
+                refreshAllViews();
+            }
+        }
+
+        // --- MANEJO DE PLAN DE MANTENIMIENTO ---
+        function openPlanModal(plan = null) {
+            const isEdit = !!plan;
+            const compOpts = db.componentes.map(c => `<option value="${c.id_componente}" ${isEdit && plan.id_componente == c.id_componente ? 'selected' : ''}>${c.nombre_componente}</option>`).join('');
+
+            const fields = `
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Componente Asignado:</label>
+                    <select id="p_componente" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                        ${compOpts}
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Frecuencia (Km):</label>
+                        <input type="number" id="p_km" required step="500" value="${isEdit ? plan.frecuencia_km : 5000}" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Frecuencia (Horas):</label>
+                        <input type="number" id="p_horas" required step="10" value="${isEdit ? plan.frecuencia_horas : 150}" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Tipo de Servicio:</label>
+                    <select id="p_tipo" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                        <option value="PREVENTIVO" ${isEdit && plan.tipo_mantenimiento === 'PREVENTIVO' ? 'selected' : ''}>PREVENTIVO</option>
+                        <option value="AJUSTE" ${isEdit && plan.tipo_mantenimiento === 'AJUSTE' ? 'selected' : ''}>AJUSTE</option>
+                        <option value="RUTINA" ${isEdit && plan.tipo_mantenimiento === 'RUTINA' ? 'selected' : ''}>RUTINA</option>
+                        <option value="CRÍTICO" ${isEdit && plan.tipo_mantenimiento === 'CRÍTICO' ? 'selected' : ''}>CRÍTICO</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Fecha del Último Mantenimiento:</label>
+                    <input type="date" id="p_fecha" value="${isEdit ? plan.fecha_ultimo_mantenimiento : new Date().toISOString().split('T')[0]}" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+            `;
+            openModal(isEdit ? 'Modificar Plan' : 'Programar Mantenimiento', fields, 'plan', isEdit ? 'edit' : 'add', isEdit ? plan.id_plan : null);
+        }
+
+        function editPlan(id) {
+            const plan = db.plan.find(p => p.id_plan === id);
+            if(plan) openPlanModal(plan);
+        }
+
+        function deletePlan(id) {
+            if(confirm('¿Eliminar esta programación técnica del plan?')) {
+                db.plan = db.plan.filter(p => p.id_plan !== id);
+                refreshAllViews();
+            }
+        }
+
+        // --- MANEJO DE HISTORIAL DE EJECUCIONES ---
+        function openHistorialModal(historial = null) {
+            const isEdit = !!historial;
+            const compOpts = db.componentes.map(c => `<option value="${c.id_componente}" ${isEdit && historial.id_componente == c.id_componente ? 'selected' : ''}>${c.nombre_componente}</option>`).join('');
+            const mecaOpts = db.mecanicos.map(m => `<option value="${m.id_mecanico}" ${isEdit && historial.id_mecanico == m.id_mecanico ? 'selected' : ''}>${m.nombre}</option>`).join('');
+
+            const fields = `
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Componente Intervenido:</label>
+                    <select id="h_componente" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                        ${compOpts}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Mecánico Ejecutor:</label>
+                    <select id="h_mecanico" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                        ${mecaOpts}
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Fecha de Intervención:</label>
+                        <input type="date" id="h_fecha" required value="${isEdit ? historial.fecha_mantenimiento : new Date().toISOString().split('T')[0]}" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Costo Total ($):</label>
+                        <input type="number" id="h_costo" step="0.01" required value="${isEdit ? historial.costo_total : 50.00}" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Odómetro Km Actuales:</label>
+                        <input type="number" id="h_km" required value="${isEdit ? historial.km_actuales : 45000}" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Horas de Uso del Motor:</label>
+                        <input type="number" id="h_horas" required value="${isEdit ? historial.horas_uso : 1350}" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Detalles y Observaciones Técnicas:</label>
+                    <textarea id="h_detalles" rows="3" required class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500" placeholder="Escriba los procedimientos efectuados...">${isEdit ? historial.detalles_observaciones : ''}</textarea>
+                </div>
+            `;
+            openModal(isEdit ? 'Modificar Registro de Bitácora' : 'Registrar Intervención en Bitácora', fields, 'historial', isEdit ? 'edit' : 'add', isEdit ? historial.id_historial : null);
+        }
+
+        function editHistorial(id) {
+            const h = db.historial.find(x => x.id_historial === id);
+            if(h) openHistorialModal(h);
+        }
+
+        function deleteHistorial(id) {
+            if(confirm('¿Eliminar este registro de la bitácora?')) {
+                db.historial = db.historial.filter(h => h.id_historial !== id);
+                refreshAllViews();
+            }
+        }
+
+        function quickAddHistorial() {
+            switchTab('tab-historial');
+            openHistorialModal();
+        }
+
+        // SUBMIT UNIFICADO DEL FORMULARIO DEL MODAL
+        function handleModalSubmit(event) {
+            event.preventDefault();
+            const { entity, action, id } = currentModalMode;
+
+            if(entity === 'mecanicos') {
+                const nombre = document.getElementById('m_nombre').value;
+                const especialidad = document.getElementById('m_especialidad').value;
+                const estado = document.getElementById('m_estado').value;
+
+                if(action === 'add') {
+                    const newId = db.mecanicos.length ? Math.max(...db.mecanicos.map(m => m.id_mecanico)) + 1 : 1;
+                    db.mecanicos.push({ id_mecanico: newId, nombre, especialidad, estado });
+                } else {
+                    const mec = db.mecanicos.find(m => m.id_mecanico === id);
+                    if(mec) { mec.nombre = nombre; mec.especialidad = especialidad; mec.estado = estado; }
+                }
+            }
+            else if(entity === 'componentes') {
+                const nombre_componente = document.getElementById('c_nombre').value;
+                const subsistema = document.getElementById('c_subsistema').value;
+                const id_mecanico_responsable = parseInt(document.getElementById('c_mecanico').value);
+
+                if(action === 'add') {
+                    const newId = db.componentes.length ? Math.max(...db.componentes.map(c => c.id_componente)) + 1 : 1;
+                    db.componentes.push({ id_componente: newId, nombre_componente, subsistema, id_mecanico_responsable });
+                } else {
+                    const comp = db.componentes.find(c => c.id_componente === id);
+                    if(comp) { comp.nombre_componente = nombre_componente; comp.subsistema = subsistema; comp.id_mecanico_responsable = id_mecanico_responsable; }
+                }
+            }
+            else if(entity === 'repuestos') {
+                const codigo_pieza = document.getElementById('r_codigo').value;
+                const nombre_repuesto = document.getElementById('r_nombre').value;
+                const id_componente = parseInt(document.getElementById('r_componente').value);
+                const stock_actual = parseInt(document.getElementById('r_stock_actual').value);
+                const stock_minimo = parseInt(document.getElementById('r_stock_minimo').value);
+
+                if(action === 'add') {
+                    const newId = db.repuestos.length ? Math.max(...db.repuestos.map(r => r.id_repuesto)) + 1 : 1;
+                    db.repuestos.push({ id_repuesto: newId, id_componente, codigo_pieza, nombre_repuesto, stock_actual, stock_minimo });
+                } else {
+                    const rep = db.repuestos.find(r => r.id_repuesto === id);
+                    if(rep) { rep.codigo_pieza = codigo_pieza; rep.nombre_repuesto = nombre_repuesto; rep.id_componente = id_componente; rep.stock_actual = stock_actual; rep.stock_minimo = stock_minimo; }
+                }
+            }
+            else if(entity === 'plan') {
+                const id_componente = parseInt(document.getElementById('p_componente').value);
+                const frecuencia_km = parseInt(document.getElementById('p_km').value);
+                const frecuencia_horas = parseInt(document.getElementById('p_horas').value);
+                const tipo_mantenimiento = document.getElementById('p_tipo').value;
+                const fecha_ultimo_mantenimiento = document.getElementById('p_fecha').value;
+
+                if(action === 'add') {
+                    const newId = db.plan.length ? Math.max(...db.plan.map(p => p.id_plan)) + 1 : 1;
+                    db.plan.push({ id_plan: newId, id_componente, frecuencia_km, frecuencia_horas, tipo_mantenimiento, fecha_ultimo_mantenimiento });
+                } else {
+                    const p = db.plan.find(x => x.id_plan === id);
+                    if(p) { p.id_componente = id_componente; p.frecuencia_km = frecuencia_km; p.frecuencia_horas = frecuencia_horas; p.tipo_mantenimiento = tipo_mantenimiento; p.fecha_ultimo_mantenimiento = fecha_ultimo_mantenimiento; }
+                }
+            }
+            else if(entity === 'historial') {
+                const id_componente = parseInt(document.getElementById('h_componente').value);
+                const id_mecanico = parseInt(document.getElementById('h_mecanico').value);
+                const fecha_mantenimiento = document.getElementById('h_fecha').value;
+                const costo_total = parseFloat(document.getElementById('h_costo').value);
+                const km_actuales = parseInt(document.getElementById('h_km').value);
+                const horas_uso = parseInt(document.getElementById('h_horas').value);
+                const detalles_observaciones = document.getElementById('h_detalles').value;
+
+                if(action === 'add') {
+                    const newId = db.historial.length ? Math.max(...db.historial.map(h => h.id_historial)) + 1 : 1;
+                    db.historial.push({ id_historial: newId, id_componente, id_mecanico, fecha_mantenimiento, km_actuales, horas_uso, detalles_observaciones, costo_total });
+                    
+                    // Actualizar automáticamente la fecha en el plan de mantenimiento asociado
+                    const planAssoc = db.plan.find(p => p.id_componente === id_componente);
+                    if(planAssoc) {
+                        planAssoc.fecha_ultimo_mantenimiento = fecha_mantenimiento;
+                    }
+                } else {
+                    const h = db.historial.find(x => x.id_historial === id);
+                    if(h) {
+                        h.id_componente = id_componente;
+                        h.id_mecanico = id_mecanico;
+                        h.fecha_mantenimiento = fecha_mantenimiento;
+                        h.costo_total = costo_total;
+                        h.km_actuales = km_actuales;
+                        h.horas_uso = horas_uso;
+                        h.detalles_observaciones = detalles_observaciones;
+                    }
+                }
+            }
+
+            closeModal();
+            refreshAllViews();
+        }
+    </script>
+</body>
+</html>
